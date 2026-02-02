@@ -1,3 +1,7 @@
+// Aaron Blum
+// CIST2361: Lab 03
+// 01/31/2026
+// This program is a math tutor.
 #include <conio.h>  // Only for Windows
 
 #include <iomanip>
