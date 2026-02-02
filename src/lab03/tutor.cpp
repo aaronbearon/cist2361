@@ -9,13 +9,12 @@
 #include <random>
 using namespace std;
 
+// Passing both numbers by reference
 void getRandomNumbers(int& a, int& b) {
   random_device myEngine;
   uniform_int_distribution<int> randomInt(0, 1000);
   a = randomInt(myEngine);
   b = randomInt(myEngine);
-  a = 6;
-  b = 996;
 }
 
 int countDigits(int n) {
@@ -39,7 +38,7 @@ void printProblem(int a, int b, int width) {
 void printSolution(int a, int b, int width) {
   int sum = a + b;
 
-  // extra width on the sum (no leading space or plus)
+  // Extra width on the sum (no leading space or plus)
   cout << setw(width + 1) << sum << endl;
 }
 
