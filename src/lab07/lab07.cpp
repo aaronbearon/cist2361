@@ -1,3 +1,8 @@
+// Aaron Blum
+// CIST2361: Lab 07
+// 03/04/2026
+// This program does statistics on numbers and file operations.
+
 #include <cassert>
 #include <cmath>
 #include <fstream>
@@ -6,34 +11,48 @@
 #include <string>
 using namespace std;
 
-bool runTopMenu();
+// Runs the main menu once, returns false if the user is exiting.
+bool runTopMenu(double arr[], int &arrSize);
+// Print the main menu.
 void printMenu();
+
+// Create a new data file with user input.
 void writeData();
-void readData();
+// Read data from a file into the array.
+void readData(double arr[], int &arrSize);
+
+// Computes the lowest number in array.
+double computeLowest(double arr[], int arrSize);
+// Computes the highest number in array.
+double computeHighest(double arr[], int arrSize);
+// Computes the sum of the array.
+double computeSum(double arr[], int arrSize);
+// Computes the average of the array.
+double computeAverage(double arr[], int arrSize);
+
+// Helper to ask the user for a file name.
 string getFileName(const string&);
-double computeLowest();
-double computeHighest();
-double computeSum();
-double computeAverage();
+// Helper to print a result with a label.
 void printResult(string label, double value);
+// Helper to validate main menu choices.
 bool isValidMainMenuInput(string, int&);
+// Helper to validate numeric inputs.
 bool isValidDouble(string, double&);
 
 const int MAX_SIZE = 10;
-double arr[MAX_SIZE];
-int arrSize;
 const string ERROR_NO_DATA = "No data: please load data first!";
 const string OUT_FILE_MESSAGE = "write to";
 const string IN_FILE_MESSAGE = "read from";
 
 int main() {
   // Run everything from here.
-  arrSize = 0;
-  while (runTopMenu());
+  double arr[MAX_SIZE];
+  int arrSize = 0;
+  while (runTopMenu(arr, arrSize));
   return 0;
 }
 
-bool runTopMenu() {
+bool runTopMenu(double arr[], int &arrSize) {
   printMenu();
   cout << "? ";
 
@@ -57,19 +76,19 @@ bool runTopMenu() {
       writeData();
       return true;
     case 2:
-      readData();
+      readData(arr, arrSize);
       return true;
     case 3:
-      printResult("Lowest", computeLowest());
+      printResult("Lowest", computeLowest(arr, arrSize));
       return true;
     case 4:
-      printResult("Highest", computeHighest());
+      printResult("Highest", computeHighest(arr, arrSize));
       return true;
     case 5:
-      printResult("Sum", computeSum());
+      printResult("Sum", computeSum(arr, arrSize));
       return true;
     case 6:
-      printResult("Average", computeAverage());
+      printResult("Average", computeAverage(arr, arrSize));
       return true;
     case 7:
       return false;
@@ -112,7 +131,7 @@ void writeData() {
   cout << "Writing data to file..." << endl;
   int count;
   // Only 10 numbers...
-  for (count = 0; count < MAX_SIZE; count++) {
+  for (count = 0; count < MAX_SIZE; ) {
     cout << "#" << count + 1 << ": ";
     string answerStr;
     getline(cin, answerStr);
@@ -124,18 +143,18 @@ void writeData() {
     double num;
     if (isValidDouble(answerStr, num)) {  // do stuff, test
       outFile << num << endl;
+      count++;
     } else {
       cout << "Error, invalid number, try again." << endl;
-      // Try again with bad input detected.
-      count--;
     }
   }
 
+  outFile.close(); // redundant
   cout << count << " number(s) written to file successfully." << endl;
 }
 
 // Data from input file to global array
-void readData() {
+void readData(double arr[], int &arrSize) {
   // Reset this with any attempt to read from file.
   // Note: instructions say to reset the global array.
   // This implementation is logically equivalent.
@@ -170,8 +189,53 @@ void readData() {
     arrSize++;
   }
 
+  inFile.close(); // redundant
   cout << arrSize << " number(s) read from file successfully." << endl;
 }
+
+// -- analysis functions
+// The four functions below are based only on the array elements with file data.
+
+double computeLowest(double arr[], int arrSize) {
+  double min = 0;
+  for (int i = 0; i < arrSize; i++) {
+    if (i == 0 || min > arr[i]) {
+      min = arr[i];
+    }
+  }
+  return min;
+}
+
+double computeHighest(double arr[], int arrSize) {
+  double max = 0;
+  for (int i = 0; i < arrSize; i++) {
+    if (i == 0 || max < arr[i]) {
+      max = arr[i];
+    }
+  }
+  return max;
+}
+
+double computeSum(double arr[], int arrSize) {
+  double sum = 0;
+  for (int i = 0; i < arrSize; i++) {
+    sum += arr[i];
+  }
+  return sum;
+}
+
+double computeAverage(double arr[], int arrSize) {
+  if (arrSize == 0) {
+    return 0; // should never happen
+  }
+  double sum = computeSum(arr, arrSize);
+  double avg = sum / arrSize;
+  return avg;
+}
+
+// -- end analysis functions
+
+// -- helper functions
 
 string getFileName(const string& message) {
   string filename;
@@ -185,46 +249,6 @@ string getFileName(const string& message) {
       return filename;
     }
   }
-}
-
-// The four functions below are based only on the array elements with file data.
-
-// Smallest
-double computeLowest() {
-  double min = 0;
-  for (int i = 0; i < arrSize; i++) {
-    if (i == 0 || min > arr[i]) {
-      min = arr[i];
-    }
-  }
-  return min;
-}
-
-// Largest
-double computeHighest() {
-  double max = 0;
-  for (int i = 0; i < arrSize; i++) {
-    if (i == 0 || max < arr[i]) {
-      max = arr[i];
-    }
-  }
-  return max;
-}
-
-// Total
-double computeSum() {
-  double sum = 0;
-  for (int i = 0; i < arrSize; i++) {
-    sum += arr[i];
-  }
-  return sum;
-}
-
-// Average
-double computeAverage() {
-  double sum = computeSum();
-  double avg = sum / arrSize;
-  return avg;
 }
 
 // Display the result with a label.
@@ -257,3 +281,5 @@ bool isValidDouble(string answerStr, double& answer) {
     return false;
   }
 }
+
+// -- end helper functions
