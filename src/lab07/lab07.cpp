@@ -12,14 +12,14 @@
 using namespace std;
 
 // Runs the main menu once, returns false if the user is exiting.
-bool runTopMenu(double arr[], int &arrSize);
+bool runTopMenu(double arr[], int& arrSize);
 // Print the main menu.
 void printMenu();
 
 // Create a new data file with user input.
 void writeData();
 // Read data from a file into the array.
-void readData(double arr[], int &arrSize);
+void readData(double arr[], int& arrSize);
 
 // Computes the lowest number in array.
 double computeLowest(double arr[], int arrSize);
@@ -52,7 +52,7 @@ int main() {
   return 0;
 }
 
-bool runTopMenu(double arr[], int &arrSize) {
+bool runTopMenu(double arr[], int& arrSize) {
   printMenu();
   cout << "? ";
 
@@ -131,7 +131,7 @@ void writeData() {
   cout << "Writing data to file..." << endl;
   int count;
   // Only 10 numbers...
-  for (count = 0; count < MAX_SIZE; ) {
+  for (count = 0; count < MAX_SIZE;) {
     cout << "#" << count + 1 << ": ";
     string answerStr;
     getline(cin, answerStr);
@@ -149,12 +149,12 @@ void writeData() {
     }
   }
 
-  outFile.close(); // redundant
+  outFile.close();  // redundant
   cout << count << " number(s) written to file successfully." << endl;
 }
 
 // Data from input file to global array
-void readData(double arr[], int &arrSize) {
+void readData(double arr[], int& arrSize) {
   // Reset this with any attempt to read from file.
   // Note: instructions say to reset the global array.
   // This implementation is logically equivalent.
@@ -189,7 +189,7 @@ void readData(double arr[], int &arrSize) {
     arrSize++;
   }
 
-  inFile.close(); // redundant
+  inFile.close();  // redundant
   cout << arrSize << " number(s) read from file successfully." << endl;
 }
 
@@ -226,7 +226,7 @@ double computeSum(double arr[], int arrSize) {
 
 double computeAverage(double arr[], int arrSize) {
   if (arrSize == 0) {
-    return 0; // should never happen
+    return 0;  // should never happen
   }
   double sum = computeSum(arr, arrSize);
   double avg = sum / arrSize;
