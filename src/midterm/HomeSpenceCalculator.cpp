@@ -23,25 +23,26 @@ const string UTILITIES[] = {"Electricity", "Water", "Gas", "Internet"};
 
 const string MEALS[] = {"Groceries", "Restaurants"};
 
+// Can use as a "2D array" with a certain datatype for each whole column.
 struct LineItem {
   string category;
   int actual;
   int budget;
 };
 
-void displayMenu();
-void inputStartEndMonth(int& startMonth, int& endMonth);
-void inputSameMonthly(LineItem& item, int numMonths);
-void inputItemized(LineItem& item, string category,
-                   const string subcategories[], int startMonth, int endMonth,
-                   const int SIZE);
-void inputTotal(LineItem& item, int startMonth, int endMonth);
-int inputInt(string prompt);
-void displayTable(const LineItem items[], const int SIZE, int startMonth,
-                  int endMonth);
-string asCurrency(int amount);
-string asVariance(int amount);
-void displaySummary(const LineItem items[], const int SIZE);
+// Function prototypes shouldn't include parameter names.
+void displayMonthsMenu();
+void inputStartEndMonth(int&, int&);
+void displayExpenseMenu(LineItem[], const int);
+void inputExpenses(LineItem[], int, int);
+void inputSameMonthly(LineItem&, int);
+void inputItemized(LineItem&, string, const string[], int, int, const int);
+void inputTotal(LineItem&, int, int);
+int inputInt(string);
+void displayTable(const LineItem[], const int, int, int);
+string asCurrency(int);
+string asVariance(int);
+void displaySummary(const LineItem[], const int);
 
 // global input stream, so we can override with a file for testing
 istream* input = &cin;
@@ -59,33 +60,16 @@ int main() {
       {"Renovations", 0, 0},    {"Meals", 0, 0},
   };
 
-  displayMenu();
-
+  displayMonthsMenu();
   int startMonth, endMonth;
   inputStartEndMonth(startMonth, endMonth);
-  int numMonths = endMonth - startMonth + 1;
-
-  // first two categories, input monthly, but same every month
-  inputSameMonthly(items[0], numMonths);
-  inputSameMonthly(items[1], numMonths);
-
-  // utilities is itemized with subcategories and different each month
-  inputItemized(items[2], "UTILITIES", UTILITIES, startMonth, endMonth, 4);
-
-  // next two categories just take a single value
-  inputTotal(items[3], startMonth, endMonth);
-  inputTotal(items[4], startMonth, endMonth);
-
-  // meals is itemized with subcategories and different each month
-  inputItemized(items[5], "MEALS", MEALS, startMonth, endMonth, 2);
-
-  displayTable(items, 6, startMonth, endMonth);
-  displaySummary(items, 6);
+  displayExpenseMenu(items, 6);
+  inputExpenses(items, startMonth, endMonth);
   return 0;
 }
 
-// Required menu function.
-void displayMenu() {
+// Menu function to display the months for user selection.
+void displayMonthsMenu() {
   cout << "Which months do you want to calculate expenses for below?" << endl;
   cout << endl;
   for (int i = 0; i < 12; i++) {
@@ -115,6 +99,39 @@ void inputStartEndMonth(int& startMonth, int& endMonth) {
            << " and 12. Please try again." << endl;
     }
   }
+}
+
+// Menu function to display the expense types for user selection.
+void displayExpenseMenu(LineItem items[], const int SIZE) {
+  cout << endl;
+  cout << "Here are the expense types below:" << endl;
+  cout << endl;
+  for (int i = 0; i < SIZE; i++) {
+    cout << (i + 1) << ". " << items[i].category << endl;
+  }
+
+  cout << endl;
+}
+
+void inputExpenses(LineItem items[], int startMonth, int endMonth) {
+  int numMonths = endMonth - startMonth + 1;
+
+  // first two categories, input monthly, but same every month
+  inputSameMonthly(items[0], numMonths);
+  inputSameMonthly(items[1], numMonths);
+
+  // utilities is itemized with subcategories and different each month
+  inputItemized(items[2], "UTILITIES", UTILITIES, startMonth, endMonth, 4);
+
+  // next two categories just take a single value
+  inputTotal(items[3], startMonth, endMonth);
+  inputTotal(items[4], startMonth, endMonth);
+
+  // meals is itemized with subcategories and different each month
+  inputItemized(items[5], "MEALS", MEALS, startMonth, endMonth, 2);
+
+  displayTable(items, 6, startMonth, endMonth);
+  displaySummary(items, 6);
 }
 
 void inputSameMonthly(LineItem& item, int numMonths) {
@@ -238,6 +255,7 @@ void displaySummary(const LineItem items[], const int SIZE) {
   cout << endl;
 }
 
+// Currency formatting, but without cents.
 string asCurrency(int amount) {
   ostringstream oss;
   oss.imbue(locale("en_US.UTF-8"));
@@ -245,10 +263,12 @@ string asCurrency(int amount) {
   return oss.str();
 }
 
+// Variance formatting, with a plus or minus sign.
+// This calls the currency formatting function.
 string asVariance(int amount) {
   if (amount < 0) {
     return "-" + asCurrency(-amount);
-  } else  if (amount > 0) {
+  } else if (amount > 0) {
     return "+" + asCurrency(amount);
   } else {
     return asCurrency(0);
