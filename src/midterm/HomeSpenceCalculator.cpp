@@ -80,7 +80,7 @@ istream* input = &cin;
 
 int main() {
   ifstream inFile;  // no close needed, use function scope destructor
-  inFile.open("sample.txt");
+  inFile.open("neutral.txt");
   if (inFile) {
     input = &inFile;
   }
@@ -202,16 +202,24 @@ void inputTotal(LineItem& item, int startMonth, int endMonth) {
 
 int inputInt(string prompt) {
   int value = 0;
+  string line;
   while (true) {
     cout << prompt << ": ";
-    *input >> value;
-    if (input->fail() || value < 0) {
-      cout << "Error: Please enter a valid integer." << endl;
+
+    // Read the entire line of input
+    if (!getline(*input, line)) {
       input->clear();
-      input->ignore(numeric_limits<streamsize>::max(), '\n');
+      continue;
+    }
+
+    stringstream ss(line);
+    // This checks if there are any characters left over.
+    char extra;
+    if (!(ss >> value) || (ss >> extra) || value < 0) {
+      cout << "Error: Please enter a valid non-negative integer." << endl;
     } else {
       if (input != &cin) {
-        cout << value << endl;  // for file read, debug print the value
+        cout << value << endl;
       }
       return value;
     }
