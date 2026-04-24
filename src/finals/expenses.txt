@@ -1,4 +1,4 @@
-1 Mortgage 1200 1200
+1 Mortgage 1200.45 1200
 1 Utilities 350 300
 2 Groceries 500 450
 2 Gas 120 100

@@ -28,14 +28,17 @@ struct MonthlySummary {
 
 // Function prototypes
 bool parseLine(const string& line, Expense* record);
-// bool parseFirstLine(const string& line, int* userMonth);
-void processFile(const string& filename);
+void processFile(const string& filename, MonthlySummary summaries[]);
+void printYearlyReport(MonthlySummary summaries[]);
 void sortArray(MonthlySummary summaries[], bool ascending);
 void swapItems(MonthlySummary* a, MonthlySummary* b);
 
 int main() {
   const string filename = "expenses.txt";
-  processFile(filename);
+  MonthlySummary summaries[SIZE];
+
+  processFile(filename, summaries);
+  printYearlyReport(summaries);
 
   return 0;
 }
@@ -77,44 +80,11 @@ bool parseLine(const string& line, Expense* record) {
   }
 }
 
-// bool parseFirstLine(const string& line, int* userMonth) {
-//   if (line.empty()) {
-//     return false;
-//   }
-
-//   stringstream ss(line);
-//   vector<string> tokens;
-//   string temp;
-
-//   // Split the line into individual words (tokens)
-//   while (ss >> temp) {
-//     tokens.push_back(temp);
-//   }
-
-//   if (tokens.size() != 1) {
-//     return false;
-//   }
-
-//   try {
-//     // Attempt conversions - these throw exceptions if they fail
-//     *userMonth = stoi(tokens[0]);
-//     if (*userMonth >= 1 && *userMonth <= 12) {
-//       return true;
-//     } else {
-//       return false;
-//     }
-//   } catch (const invalid_argument& e) {
-//     return false;
-//   } catch (const out_of_range& e) {
-//     return false;
-//   }
-// }
-
 // Handles file opening and iterates through each line.
-void processFile(const string& filename) {
+// Load monthly data from the file into the summaries array.
+void processFile(const string& filename, MonthlySummary summaries[]) {
   ifstream inputFile(filename);
   vector<Expense> validRecords;
-  MonthlySummary summaries[SIZE];
   for (int i = 0; i < 12; i++) {
     summaries[i].month = i + 1;
     summaries[i].totalActual = 0;
@@ -127,15 +97,6 @@ void processFile(const string& filename) {
   }
 
   string line;
-  // int userMonth;
-  // int* ptrMonth = &userMonth;
-  // if (getline(inputFile, line)) {
-  //   if (!parseFirstLine(line, ptrMonth)) {
-  //     cout << "Error, invalid first entry." << endl;
-  //     exit(EXIT_FAILURE);
-  //   }
-  // }
-
   while (getline(inputFile, line)) {
     // If the line is just a trailing newline/empty, we skip it
     if (line.empty()) continue;
@@ -152,6 +113,11 @@ void processFile(const string& filename) {
     }
   }
 
+  inputFile.close();
+}
+
+// Print the data stored in the previously loaded summaries array.
+void printYearlyReport(MonthlySummary summaries[]) {
   cout << fixed << showpoint << setprecision(2);
   cout << "=== Monthly Totals and Monthly Budgets (Unsorted) ===" << endl;
   int actualSum = 0;
@@ -181,35 +147,35 @@ void processFile(const string& filename) {
   }
 
   cout << endl;
-  cout << "Month with highest amount spent: " << MONTHS[summaries[0].month - 1] << endl;
+  cout << "Month with highest amount spent: " << MONTHS[summaries[0].month - 1]
+       << ", at $" << summaries[0].totalActual << endl;
   cout << "Total spent: $" << actualSum << endl;
   cout << "Total budgeted: $" << budgetedSum << endl;
 
-  // TODO: Sort the array with actual amounts spent.
-
   cout << endl;
-
-  inputFile.close();
-
-  // TOTAL GARBAGE FROM GEMINI:
-  // Optional: Print total count of successful reads
-  // cout << "\nTotal valid records stored: " << validRecords.size() << endl;
 }
 
+// Use pointers and structs to sort the array.
 void sortArray(MonthlySummary summaries[], bool ascending) {
   for (int i = 0, j = 0; i < SIZE; i++, j++) {
     bool swapNeeded = false;
+    // Check that j isn't 0 to prevent -array index out of bounds.
     if (j > 0) {
       double* lValPtr = &(summaries[j - 1].totalActual);
       double* rValPtr = &(summaries[j].totalActual);
       MonthlySummary* lStructPtr = &(summaries[j - 1]);
       MonthlySummary* rStructPtr = &(summaries[j]);
-      if ((*lValPtr > *rValPtr && ascending) || (*lValPtr < *rValPtr && !ascending)) {
+      if ((*lValPtr > *rValPtr && ascending) ||
+          (*lValPtr < *rValPtr && !ascending)) {
         swapItems(lStructPtr, rStructPtr);
         swapNeeded = true;
       }
     }
 
+    // Decrement values if a swap had to be performed.
+    // This is a clever sorting algorithm.
+    // It ensures that every new unsorted value is swapped to the left until
+    //  it's in the correct place.
     if (swapNeeded) {
       i--;
       j -= 2;
@@ -219,6 +185,7 @@ void sortArray(MonthlySummary summaries[], bool ascending) {
   }
 }
 
+// Use pointers to swap structs in the array.
 void swapItems(MonthlySummary* a, MonthlySummary* b) {
   MonthlySummary temp = *b;
   *b = *a;
